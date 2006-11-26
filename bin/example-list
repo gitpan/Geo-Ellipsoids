@@ -2,19 +2,20 @@
 
 =head1 NAME
 
-example-list - Geo:Ellipsiods example
+example-list - Geo:Ellipsoids example
 
 =cut
 
 use strict;
 use lib q{../lib};
 use lib q{./lib};
-use Geo::Ellipsiods;
-
-my $object=Geo::Ellipsoids->new()
-               || die("Error: Cannot create object.");
-
-my @list=$object->list();
-while (sort @list) {
-  print $_->[0], "\n";
+use Geo::Ellipsoids;
+my $obj=Geo::Ellipsoids->new(); #defaults to WGS84
+my $list=$obj->list;
+foreach (sort @$list) {
+  $obj->set($_);
+  print "Short Name: ", $obj->shortname, "\n";
+  print "Long Name:  ", $obj->longname, "\n";
+  print "Ellipsoid:  ", "{a=>",$obj->a,",b=>",$obj->b,"}", "\n";
+  print "\n";
 }

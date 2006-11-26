@@ -22,7 +22,7 @@ use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.01} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.02} =~ /(\d+)\.(\d+)/);
 
 =head1 METHODS
 
@@ -46,7 +46,7 @@ sub initialize {
 sub list {
   my $self=shift();
   my $data=$self->data;
-  return keys %$data;
+  return [keys %$data];
 }
 
 sub a {
@@ -206,18 +206,64 @@ sub data {
                     data=>{a=>6378206.4,i=>294.9786982138},
                     alias=>[qw{NAD27 NAD-27}]},
     
-    'Airy 1858'=>{name=>'Airy 1858',
+    'Airy 1858'=>{name=>'Airy 1858 Ellipsoid',
                   data=>{a=>6377563.396,i=>299.3249646}},
+
+
     'Airy Modified'=>{name=>'Modified Airy Spheroid',
                       data=>{a=>6377340.189,b=>6356034.448}},
+
     'Australian National'=>{name=>'Australian National Spheroid',
                             data=>{a=>6378160,i=>298.25}},
-    'Bessel 1841'=>{name=>'Bessel 1841',
+
+    'Bessel 1841'=>{name=>'Bessel 1841 Ellipsoid',
                     data=>{a=>6377397.155,i=>299.1528128}},
+
     'Clarke 1880'=>{name=>'Clarke Ellipsoid of 1880',
                     data=>{a=>6378249.145,b=>6356514.966}},
+
     'Everest 1830'=>{name=>'Everest Spheroid of 1830',
                      data=>{a=>6377276.345,i=>300.8017}},
+
+    'Everest Modified'=>{name=>'Modified Everest Spheroid',
+                         data=>{a=>6377304.063,i=>300.8017}},
+
+    'Fisher 1960'=>{name=>'Fisher 1960',
+                    data=>{a=>6378166,i=>298.3}},
+
+    'Fisher 1968'=>{name=>'Fisher 1968',
+                    data=>{a=>6378150,i=>298.3}},
+
+    'Hough 1956'=>{name=>'Hough 1956',
+                   data=>{a=>6378270,i=>297}},
+
+    'International (Hayford)'=>{name=>'International (Hayford)',
+                                data=>{a=>6378388,i=>297}},
+
+    'Krassovsky 1938'=>{name=>'Krassovsky 1938',
+                        data=>{a=>6378245,i=>298.3}},
+
+    'NWL-9D'=>{name=>'NWL-9D Ellipsoid',
+               data=>{a=>6378145,i=>298.25},
+               alias=>['WGS-66'=>'World Geodetic System 1966']},
+
+    'SA69'=>{name=>'South American 1969',
+             data=>{a=>6378160,i=>298.25},
+             alias=>['SA-69']},
+
+    'SGS85'=>{name=>'Soviet Geodetic System 1985',
+              data=>{a=>6378136,i=>298.257},
+              alias=>['SGS-85']},
+
+    'WGS72'=>{name=>'World Geodetic System 1972',
+              data=>{a=>6378135,i=>298.26},
+              alias=>['WGS-72']},
+
+    'WOS'=>{name=>'War Office Spheroid',
+            data=>{a=>6378300.58,i=>296}},
+
+    'UTM'=>{name=>'Department of the Army Universal Transverse Mercator',
+            data=>{a=>6378249.2,b=>6356515.0}},
   };
 }
 

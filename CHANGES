@@ -1,4 +1,6 @@
 Revision history for Geo::Forward
 
+2006-11-25 v0.02
+  * Fixed list method and example
 2006-11-25 v0.01
   * Original version

@@ -1,7 +1,5 @@
 bin/example-list
-bin/example-set
 CHANGES
-doc/forward.for
 lib/Geo/Ellipsoids.pm
 LICENSE
 Makefile.PL
