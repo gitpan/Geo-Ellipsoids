@@ -7,12 +7,12 @@ Geo::Ellipsoids - Standard perl Geo package for Ellipsoids a and f (and invf) va
 =head1 SYNOPSIS
 
   use Geo::Ellipsoids;
-  my $object = Geo::Ellipsoids->new();
-  $object->set('WGS84'); #default
-  print "a=", $object->a, "\n";
-  print "b=", $object->b, "\n";
-  print "f=", $object->f, "\n";
-  print "i=", $object->invf, "\n";
+  my $obj = Geo::Ellipsoids->new();
+  $obj->set('WGS84'); #default
+  print "a=", $obj->a, "\n";
+  print "b=", $obj->b, "\n";
+  print "f=", $obj->f, "\n";
+  print "i=", $obj->i, "\n";
 
 =head1 DESCRIPTION
 
@@ -22,10 +22,16 @@ use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.02} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.03} =~ /(\d+)\.(\d+)/);
 
-=head1 METHODS
+=head1 CONSTRUCTOR
 
+=head2 new
+
+The new() constructor may be called with any parameter that is appropriate to the set method.
+
+  my $obj = Geo::Ellipsoid->new();
+    
 =cut
 
 sub new {
@@ -37,11 +43,21 @@ sub new {
   return $self;
 }
 
+=head1 METHODS
+
+=cut
+
 sub initialize {
   my $self = shift();
   my $param = shift();
   $self->set($param||DEFAULT_ELIPS);
 }
+
+=head2 list
+
+Method returns a list of known elipsoid names.
+
+=cut 
 
 sub list {
   my $self=shift();
@@ -49,10 +65,22 @@ sub list {
   return [keys %$data];
 }
 
+=head2 a
+
+Method returns the value of the semi-major axis.
+
+=cut
+
 sub a {
   my $self=shift();
   return $self->{'a'} || die("Error: a must be defined here");
 }
+
+=head2 f
+
+Method returns the value of flatting
+
+=cut
 
 sub f {
   my $self=shift();
@@ -67,6 +95,12 @@ sub f {
     return undef();
   }
 }
+
+=head2 i
+
+Method returns the value of the inverse flatting
+
+=cut
 
 sub i {
   my $self=shift();
@@ -86,10 +120,22 @@ sub i {
   }
 }
 
+=head2 invf
+
+Method synonym for the i method
+
+=cut
+
 sub invf {
   my $self = shift();
   return $self->i(@_);
 }
+
+=head2 b
+
+Method returns the value of the semi-minor axis.
+
+=cut
 
 sub b {
   my $self=shift();
@@ -105,20 +151,38 @@ sub b {
   }
 }
 
+=head2 e2
+
+Method returns the value of eccentricity squared (e.g. e^2)
+
+=cut
+
 sub e2 {
   my $self=shift();
   my $f=$self->f();
   return $f*(2 - $f);
 }
 
+=head2 e
+
+Method returns the value of eccentricity
+
+=cut
+
 sub e {
   my $self=shift();
   return sqrt($self->e2);
 }
 
+=head2 set
+
+=cut
+
 sub set {
   my $self=shift();
   my $param=shift();
+  undef($self->{'shortname'});
+  undef($self->{'longname'});
   if ("HASH" eq ref($param)) {
     return $self->_setref($param);
   } elsif ('' eq ref($param)) {
@@ -134,18 +198,22 @@ sub _setref {
   if ('HASH' eq ref($param)) {
   if (defined($param->{'a'})) {
     $self->{'a'}=$param->{'a'};
+    $self->{'shortname'}='Custom' unless defined($self->shortname);
     if (defined $param->{'i'}) {
       $self->{'i'}=$param->{'i'};
       undef($self->{'b'});
       undef($self->{'f'});
+      $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',i=>'.$self->i.'}'  unless defined($self->longname);
     } elsif (defined $param->{'b'}){
       $self->{'b'}=$param->{'b'};
       undef($self->{'i'});
       undef($self->{'f'});
+      $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',b=>'.$self->b.'}'  unless defined($self->longname);
     } elsif (defined $param->{'f'}){
       $self->{'f'}=$param->{'f'};
       undef($self->{'b'});
       undef($self->{'i'});
+      $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',f=>'.$self->f.'}'  unless defined($self->longname);
     } else {
       die("Error: Need to define either i, f, or b.");
     }
@@ -163,29 +231,43 @@ sub _setname {
   my $param=shift();
   my $ref=$self->name2ref($param);
   if ("HASH" eq ref($ref)) {
-    $self->shortname($param);
-    $self->longname($param);
+    $self->{'shortname'}=$param;
+    my $data=$self->data;
+    my %data=map {$_, $data->{$_}->{'name'}} (keys %$data);
+    $self->{'longname'} = $data{$param};
     return $self->_setref($ref);
   } else {
     return undef();
   }
 }
 
+=head2 longname
+
+Method returns the long name of the current ellipsoid
+
+=cut
+
 sub longname {
   my $self = shift();
-  if (@_) { #sets value
-    my $data=$self->data;
-    my %data=map {$_, $data->{$_}->{'name'}} (keys %$data);
-    $self->{'longname'} = $data{shift()};
-  }
   return $self->{'longname'};
 }
 
+=head2 shortname
+
+Method returns the shortname, which is the hash key, of the current ellipsoid
+
+=cut
+
 sub shortname {
   my $self = shift();
-  if (@_) { $self->{'shortname'} = shift() } #sets value
   return $self->{'shortname'};
 }
+
+=head2 data
+
+Method returns a hash reference for the ellipsoid definition data structure.
+
+=cut
 
 sub data {
 #Information from
@@ -267,6 +349,12 @@ sub data {
   };
 }
 
+=head2 name2ref
+
+Method returns a hash reference (e.g. {a=>6378137,i=>298.257223563}) when passed a valid ellipsoid name (e.g. 'WGS84').
+
+=cut
+
 sub name2ref {
   my $self=shift();
   my $key=shift();
@@ -299,6 +387,8 @@ it under the same terms as Perl itself.
 
 Geo::Forward
 Geo::Ellipsoid
+
+=cut
 
 __DATA__
 #Information from

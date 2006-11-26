@@ -1,4 +1,5 @@
 bin/example-list
+bin/example-simple
 CHANGES
 lib/Geo/Ellipsoids.pm
 LICENSE
