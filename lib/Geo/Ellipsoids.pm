@@ -2,7 +2,7 @@ package Geo::Ellipsoids;
 
 =head1 NAME
 
-Geo::Ellipsoids - Standard perl Geo package for Ellipsoids a and f (and invf) values.
+Geo::Ellipsoids - Standard perl Geo package for ellipsoids a, b, f and 1/f values.
 
 =head1 SYNOPSIS
 
@@ -13,6 +13,7 @@ Geo::Ellipsoids - Standard perl Geo package for Ellipsoids a and f (and invf) va
   print "b=", $obj->b, "\n";
   print "f=", $obj->f, "\n";
   print "i=", $obj->i, "\n";
+  print "e=", $obj->e, "\n";
 
 =head1 DESCRIPTION
 
@@ -22,7 +23,7 @@ use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.03} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.04} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -50,12 +51,37 @@ sub new {
 sub initialize {
   my $self = shift();
   my $param = shift();
-  $self->set($param||DEFAULT_ELIPS);
+  $self->set($param);
+}
+
+=head2 set
+
+Method sets the current ellipsoid.  This method is called when the object is constructed (default is WGS84).
+
+=cut
+
+sub set {
+  my $self=shift();
+  my $param=shift()||DEFAULT_ELIPS;
+  undef($self->{'shortname'});
+  undef($self->{'longname'});
+  if ("HASH" eq ref($param)) {
+    return $self->_setref($param);
+  } elsif ('' eq ref($param)) {
+    return $self->_setname($param);
+  } else {
+    die("Error: Parameter must be the name of an ellipsoid or a hash reference.");
+  } 
 }
 
 =head2 list
 
-Method returns a list of known elipsoid names.
+Method returns a list reference of known elipsoid names.
+
+  my $list=$obj->list;
+  while (@$list) {
+    print "$_\n";
+  }
 
 =cut 
 
@@ -69,6 +95,8 @@ sub list {
 
 Method returns the value of the semi-major axis.
 
+  my $a=$obj->a;
+
 =cut
 
 sub a {
@@ -76,9 +104,33 @@ sub a {
   return $self->{'a'} || die("Error: a must be defined here");
 }
 
+=head2 b
+
+Method returns the value of the semi-minor axis.
+
+  my $b=$obj->b;
+
+=cut
+
+sub b {
+  my $self=shift();
+  if (defined $self->{'b'}) {
+    return $self->{'b'};
+  } elsif (defined $self->{'f'}) {
+    #f=(a-b)/a; b=a(1-f)
+    return $self->{'a'}*(1-$self->{'f'});
+  } elsif (defined $self->{'i'}) {
+    return $self->{'a'}*(1-1/$self->{'i'});
+  } else {
+    return undef();
+  }
+}
+
 =head2 f
 
 Method returns the value of flatting
+
+  my $f=$obj->f;
 
 =cut
 
@@ -99,6 +151,8 @@ sub f {
 =head2 i
 
 Method returns the value of the inverse flatting
+
+  my $i=$obj->i;
 
 =cut
 
@@ -124,6 +178,8 @@ sub i {
 
 Method synonym for the i method
 
+  my $i=$obj->infv;
+
 =cut
 
 sub invf {
@@ -131,41 +187,11 @@ sub invf {
   return $self->i(@_);
 }
 
-=head2 b
-
-Method returns the value of the semi-minor axis.
-
-=cut
-
-sub b {
-  my $self=shift();
-  if (defined $self->{'b'}) {
-    return $self->{'b'};
-  } elsif (defined $self->{'f'}) {
-    #f=(a-b)/a; b=a(1-f)
-    return $self->{'a'}*(1-$self->{'f'});
-  } elsif (defined $self->{'i'}) {
-    return $self->{'a'}*(1-1/$self->{'i'});
-  } else {
-    return undef();
-  }
-}
-
-=head2 e2
-
-Method returns the value of eccentricity squared (e.g. e^2)
-
-=cut
-
-sub e2 {
-  my $self=shift();
-  my $f=$self->f();
-  return $f*(2 - $f);
-}
-
 =head2 e
 
 Method returns the value of eccentricity
+
+  my $e=$obj->e;
 
 =cut
 
@@ -174,22 +200,18 @@ sub e {
   return sqrt($self->e2);
 }
 
-=head2 set
+=head2 e2
+
+Method returns the value of eccentricity squared (e.g. e^2)
+
+  my $e=sqrt($obj->e2);
 
 =cut
 
-sub set {
+sub e2 {
   my $self=shift();
-  my $param=shift();
-  undef($self->{'shortname'});
-  undef($self->{'longname'});
-  if ("HASH" eq ref($param)) {
-    return $self->_setref($param);
-  } elsif ('' eq ref($param)) {
-    return $self->_setname($param);
-  } else {
-    die("Error: Parameter must be the name of an ellipsoid or a hash reference.");
-  } 
+  my $f=$self->f();
+  return $f*(2 - $f);
 }
 
 sub _setref {
@@ -241,20 +263,11 @@ sub _setname {
   }
 }
 
-=head2 longname
-
-Method returns the long name of the current ellipsoid
-
-=cut
-
-sub longname {
-  my $self = shift();
-  return $self->{'longname'};
-}
-
 =head2 shortname
 
 Method returns the shortname, which is the hash key, of the current ellipsoid
+
+  my $shortname=$obj->shortname;
 
 =cut
 
@@ -263,9 +276,24 @@ sub shortname {
   return $self->{'shortname'};
 }
 
+=head2 longname
+
+Method returns the long name of the current ellipsoid
+
+  my $longname=$obj->longname;
+
+=cut
+
+sub longname {
+  my $self = shift();
+  return $self->{'longname'};
+}
+
 =head2 data
 
 Method returns a hash reference for the ellipsoid definition data structure.
+
+  my $datastructure=$obj->data;
 
 =cut
 
@@ -353,6 +381,8 @@ sub data {
 
 Method returns a hash reference (e.g. {a=>6378137,i=>298.257223563}) when passed a valid ellipsoid name (e.g. 'WGS84').
 
+  my $ref=$obj->name2ref('WGS84')
+
 =cut
 
 sub name2ref {
@@ -390,7 +420,7 @@ Geo::Ellipsoid
 
 =cut
 
-__DATA__
+__END__
 #Information from
 #  http://earth-info.nga.mil/GandG/coordsys/datums/datumorigins.html
 #  http://www.ngs.noaa.gov/PC_PROD/Inv_Fwd/
