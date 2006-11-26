@@ -1,0 +1,17 @@
+#!/usr/bin/perl -w
+
+=head1 NAME
+
+example-list - Geo:Ellipsiods example
+
+=cut
+
+use strict;
+use lib q{../lib};
+use lib q{./lib};
+use Geo::Ellipsiods;
+
+my $obj=Geo::Ellipsoids->new();
+$obj->set({a=>1,b=>1});
+
+print "a=", $obj->a, "\n";
