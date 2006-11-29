@@ -1,5 +1,8 @@
 Revision history for Geo::Forward
 
+2006-11-26 v0.05
+  * Added Documentation
+  * changed indent of one if statement
 2006-11-26 v0.04
   * Added Documentation
 2006-11-26 v0.03

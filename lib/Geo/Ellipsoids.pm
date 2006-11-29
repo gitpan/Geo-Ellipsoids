@@ -23,7 +23,7 @@ use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.04} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.05} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -58,6 +58,10 @@ sub initialize {
 
 Method sets the current ellipsoid.  This method is called when the object is constructed (default is WGS84).
 
+  $obj->set(); #default WGS84
+  $obj->set('Clarke 1866'); #All built in ellipsoids are stored in meters
+  $obj->set({a=>1, b=>1});  #Custom Sphere 1 unit radius
+
 =cut
 
 sub set {
@@ -70,7 +74,7 @@ sub set {
   } elsif ('' eq ref($param)) {
     return $self->_setname($param);
   } else {
-    die("Error: Parameter must be the name of an ellipsoid or a hash reference.");
+    die("Error: Parameter must be the name of an ellipsoid or a hash reference");
   } 
 }
 
@@ -101,7 +105,7 @@ Method returns the value of the semi-major axis.
 
 sub a {
   my $self=shift();
-  return $self->{'a'} || die("Error: a must be defined here");
+  return $self->{'a'} || die('Error: $self->{"a"} must be defined here');
 }
 
 =head2 b
@@ -218,32 +222,32 @@ sub _setref {
   my $self=shift();
   my $param=shift();
   if ('HASH' eq ref($param)) {
-  if (defined($param->{'a'})) {
-    $self->{'a'}=$param->{'a'};
-    $self->{'shortname'}='Custom' unless defined($self->shortname);
-    if (defined $param->{'i'}) {
-      $self->{'i'}=$param->{'i'};
-      undef($self->{'b'});
-      undef($self->{'f'});
-      $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',i=>'.$self->i.'}'  unless defined($self->longname);
-    } elsif (defined $param->{'b'}){
-      $self->{'b'}=$param->{'b'};
-      undef($self->{'i'});
-      undef($self->{'f'});
-      $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',b=>'.$self->b.'}'  unless defined($self->longname);
-    } elsif (defined $param->{'f'}){
-      $self->{'f'}=$param->{'f'};
-      undef($self->{'b'});
-      undef($self->{'i'});
-      $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',f=>'.$self->f.'}'  unless defined($self->longname);
+    if (defined($param->{'a'})) {
+      $self->{'a'}=$param->{'a'};
+      $self->{'shortname'}='Custom' unless defined($self->shortname);
+      if (defined $param->{'i'}) {
+        $self->{'i'}=$param->{'i'};
+        undef($self->{'b'});
+        undef($self->{'f'});
+        $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',i=>'.$self->i.'}'  unless defined($self->longname);
+      } elsif (defined $param->{'b'}){
+        $self->{'b'}=$param->{'b'};
+        undef($self->{'i'});
+        undef($self->{'f'});
+        $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',b=>'.$self->b.'}'  unless defined($self->longname);
+      } elsif (defined $param->{'f'}){
+        $self->{'f'}=$param->{'f'};
+        undef($self->{'b'});
+        undef($self->{'i'});
+        $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',f=>'.$self->f.'}'  unless defined($self->longname);
+      } else {
+        die("Error: Either i, f, or b must be defined");
+      }
     } else {
-      die("Error: Need to define either i, f, or b.");
+      die("Error: a must be defined");
     }
   } else {
-    die("Error: Need to define a.");
-  }
-  } else {
-    die('Error: Need a hash reference e.g. {a=>###, i=>###}');
+    die('Error: a hash reference e.g. {a=>###, i=>###} must be define');
   }
   return 1;
 }
@@ -259,7 +263,7 @@ sub _setname {
     $self->{'longname'} = $data{$param};
     return $self->_setref($ref);
   } else {
-    return undef();
+    die("Error: Ellipsoid $param was not found");
   }
 }
 
@@ -398,7 +402,11 @@ __END__
 
 =head1 TODO
 
+What should we do about bad input?  I tend to die in the module which for most situations is fine.  I guess you could always overload die to handle exceptions for web based solutions and the like.
+
 =head1 BUGS
+
+Please send to the geo-perl email list.
 
 =head1 LIMITS
 
@@ -417,6 +425,9 @@ it under the same terms as Perl itself.
 
 Geo::Forward
 Geo::Ellipsoid
+Geo::Coordinates::UTM
+Geo::GPS::Data::Ellipsoid
+GIS::Distance
 
 =cut
 
