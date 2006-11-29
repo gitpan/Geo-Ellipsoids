@@ -23,7 +23,7 @@ use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.05} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.06} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -241,7 +241,10 @@ sub _setref {
         undef($self->{'i'});
         $self->{'longname'}='Custom Ellipsoid {a=>'.$self->a.',f=>'.$self->f.'}'  unless defined($self->longname);
       } else {
-        die("Error: Either i, f, or b must be defined");
+        $self->{'b'}=$param->{'a'};
+        undef($self->{'f'});
+        undef($self->{'i'});
+        $self->{'longname'}='Custom Sphere {a=>'.$self->a.'}' unless defined($self->longname);
       }
     } else {
       die("Error: a must be defined");

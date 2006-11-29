@@ -38,7 +38,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 26 }
+BEGIN { plan tests => 30 }
 
 # just check that all modules can be compiled
 ok(eval {require Geo::Ellipsoids; 1}, 1, $@);
@@ -71,6 +71,12 @@ ok($obj->b, 0.995);
 ok($obj->i, 200);
 ok($obj->f, 0.005);
 
+$obj->set({a=>1});
+ok($obj->a, 1);
+ok($obj->b, 1);
+ok($obj->i, undef());
+ok($obj->f, 0);
+
 $obj->set('WGS84');
 ok($obj->a, 6378137);
 ok near($obj->b, 6356752.31424518);
@@ -88,3 +94,5 @@ ok near($obj->e2, 0.0066943800);
 $obj->set('WGS84');
 ok($obj->shortname, "WGS84");
 ok($obj->longname, "World Geodetic System of 1984");
+
+
