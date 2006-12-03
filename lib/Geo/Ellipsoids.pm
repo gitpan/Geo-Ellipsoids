@@ -23,7 +23,7 @@ use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.06} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.07} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -80,7 +80,9 @@ sub set {
 
 =head2 list
 
-Method returns a list reference of known elipsoid names.
+Method returns a list of known elipsoid names.
+
+  my @list=$obj->list;
 
   my $list=$obj->list;
   while (@$list) {
@@ -92,7 +94,8 @@ Method returns a list reference of known elipsoid names.
 sub list {
   my $self=shift();
   my $data=$self->data;
-  return [keys %$data];
+  my @keys=keys %$data;
+  return wantarray ? @keys : \@keys;
 }
 
 =head2 a
@@ -317,7 +320,7 @@ sub data {
 
     GRS80=>{name=>'Geodetic Reference System of 1980',
             data=>{a=>6378137,i=>298.25722210088},
-            alias=>[qw{GRS-80}]},
+            alias=>['GRS-80','GDA','Geocentric Datum of Australia']},
     
     'Clarke 1866'=>{name=>'Clarke Ellipsoid of 1866',
                     data=>{a=>6378206.4,i=>294.9786982138},
@@ -407,6 +410,8 @@ __END__
 
 What should we do about bad input?  I tend to die in the module which for most situations is fine.  I guess you could always overload die to handle exceptions for web based solutions and the like.
 
+Support for ellipsoid aliases in the data structure
+
 =head1 BUGS
 
 Please send to the geo-perl email list.
@@ -420,6 +425,8 @@ No guarantees that Perl handles all of the double precision calculations in the 
 Michael R. Davis qw/perl michaelrdavis com/
 
 =head1 LICENSE
+
+Copyright (c) 2006 Michael R. Davis (mrdvt92)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
