@@ -1,11 +1,13 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Geo-Ellipsoids
-version:      0.07
+version:      0.08
 version_from: lib/Geo/Ellipsoids.pm
 installdirs:  site
 requires:
     constant:                      0
+    Geo::Constants:                0.03
+    Geo::Functions:                0.02
     strict:                        0
     vars:                          0
 

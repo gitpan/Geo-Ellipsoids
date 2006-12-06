@@ -22,8 +22,10 @@ Geo::Ellipsoids - Standard perl Geo package for ellipsoids a, b, f and 1/f value
 use strict;
 use vars qw($VERSION);
 use constant DEFAULT_ELIPS => 'WGS84';
+use Geo::Constants qw{PI};
+use Geo::Functions qw{rad_deg};
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.07} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.08} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -219,6 +221,48 @@ sub e2 {
   my $self=shift();
   my $f=$self->f();
   return $f*(2 - $f);
+}
+
+=head2 n
+
+Method returns the value of n given latitude (degrees). #What is n called?
+
+  my $n=$obj->n($lat);
+
+=cut
+
+sub n {
+  my $self=shift();
+  my $lat=shift();
+  die("Error: Latitude (degrees) required.") unless defined $lat;
+  my $radians=rad_deg($lat);
+  return $self->a / sqrt(1 - $self->e2 * sin($radians)**2);
+}
+
+=head2 polar_circumference
+
+Method returns the value of the semi-minor axis times 2*PI.
+
+  my $polar_circumference=$obj->polar_circumference;
+
+=cut
+
+sub polar_circumference {
+  my $self=shift();
+  return 2 * PI() * $self->b();
+}
+
+=head2 equatorial_circumference
+
+Method returns the value of the semi-major axis times 2*PI.
+
+  my $equatorial_circumference=$obj->equatorial_circumference;
+
+=cut
+
+sub equatorial_circumference {
+  my $self=shift();
+  return 2 * PI() * $self->a();
 }
 
 sub _setref {

@@ -38,7 +38,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 30 }
+BEGIN { plan tests => 36 }
 
 # just check that all modules can be compiled
 ok(eval {require Geo::Ellipsoids; 1}, 1, $@);
@@ -76,23 +76,30 @@ ok($obj->a, 1);
 ok($obj->b, 1);
 ok($obj->i, undef());
 ok($obj->f, 0);
+ok($obj->e, 0);
+ok near($obj->equatorial_circumference, 8 * atan2(1,1), 13);
+ok near($obj->polar_circumference, 8 * atan2(1,1), 13);
 
 $obj->set('WGS84');
 ok($obj->a, 6378137);
-ok near($obj->b, 6356752.31424518);
+ok near($obj->b, 6356752.31424518, 13);
 ok($obj->i, 298.257223563);
-ok near($obj->f, 0.00335281066474748);
+ok near($obj->f, 0.00335281066474748, 12);
 
 #For the Clarke 1866, e² is 0.006768658.
 $obj->set('Clarke 1866');
-ok near($obj->e2, 0.006768658);
+ok near($obj->e2, 0.006768658, 7);
 
 #For the GRS 80, e² is 0.0066943800.
 $obj->set('GRS80');
-ok near($obj->e2, 0.0066943800);
+ok near($obj->e2, 0.0066943800, 6);
 
 $obj->set('WGS84');
 ok($obj->shortname, "WGS84");
 ok($obj->longname, "World Geodetic System of 1984");
 
+ok near($obj->equatorial_circumference, 40075016.6855785, 13);
+ok near($obj->polar_circumference, 39940652.7422451, 13);
 
+#Just testing that n works. It is not my formula.
+ok(near $obj->n(39.56789), 6386817.16791299);

@@ -3,9 +3,11 @@ WriteMakefile(
   NAME      => q{Geo::Ellipsoids},
   VERSION_FROM => q{lib/Geo/Ellipsoids.pm},
   PREREQ_PM => {
-                 strict       => 0,
-                 vars         => 0,
-                 constant     => 0,
+                 strict         => 0,
+                 vars           => 0,
+                 constant       => 0,
+                 Geo::Functions => 0.02,
+                 Geo::Constants => 0.03,
                },
                ($] >= 5.005 ? 
                  (
