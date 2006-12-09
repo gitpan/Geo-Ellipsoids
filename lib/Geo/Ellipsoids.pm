@@ -14,6 +14,7 @@ Geo::Ellipsoids - Standard perl Geo package for ellipsoids a, b, f and 1/f value
   print "f=", $obj->f, "\n";
   print "i=", $obj->i, "\n";
   print "e=", $obj->e, "\n";
+  print "n=", $obj->n(45), "\n";
 
 =head1 DESCRIPTION
 
@@ -25,7 +26,7 @@ use constant DEFAULT_ELIPS => 'WGS84';
 use Geo::Constants qw{PI};
 use Geo::Functions qw{rad_deg};
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.08} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.09} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -233,10 +234,24 @@ Method returns the value of n given latitude (degrees). #What is n called?
 
 sub n {
   my $self=shift();
-  my $lat=shift();
+  my $lat=shift(); #degrees
   die("Error: Latitude (degrees) required.") unless defined $lat;
-  my $radians=rad_deg($lat);
-  return $self->a / sqrt(1 - $self->e2 * sin($radians)**2);
+  return $self->n_rad(rad_deg($lat));
+}
+
+=head2 n_rad
+
+Method returns the value of n given latitude (radians). #What is n called?
+
+  my $n=$obj->n_rad($lat);
+
+=cut
+
+sub n_rad {
+  my $self=shift();
+  my $lat=shift(); #radians
+  die("Error: Latitude (radians) required.") unless defined $lat;
+  return $self->a / sqrt(1 - $self->e2 * sin($lat)**2);
 }
 
 =head2 polar_circumference

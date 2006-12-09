@@ -38,7 +38,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 36 }
+BEGIN { plan tests => 37 }
 
 # just check that all modules can be compiled
 ok(eval {require Geo::Ellipsoids; 1}, 1, $@);
@@ -102,4 +102,5 @@ ok near($obj->equatorial_circumference, 40075016.6855785, 13);
 ok near($obj->polar_circumference, 39940652.7422451, 13);
 
 #Just testing that n works. It is not my formula.
-ok(near $obj->n(39.56789), 6386817.16791299);
+ok(near $obj->n(39.56789), 6386817.167912991, 13);
+ok(near $obj->n_rad(0.690589958566939), 6386817.167912991, 13);
