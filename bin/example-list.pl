@@ -7,9 +7,9 @@ example-list - Geo::Ellipsoids list method example
 =cut
 
 use strict;
-use lib q{../lib};
-use lib q{./lib};
+use lib qw{./lib ../lib};
 use Geo::Ellipsoids;
+
 my $obj=Geo::Ellipsoids->new(); #defaults to WGS84
 my $list=$obj->list;
 foreach (sort @$list) {

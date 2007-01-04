@@ -2,7 +2,7 @@ package Geo::Ellipsoids;
 
 =head1 NAME
 
-Geo::Ellipsoids - Package for standard Geo:: ellipsoids a, b, f and 1/f values.
+Geo::Ellipsoids - Package for standard Geo:: ellipsoid a, b, f and 1/f values.
 
 =head1 SYNOPSIS
 
@@ -26,7 +26,7 @@ use constant DEFAULT_ELIPS => 'WGS84';
 use Geo::Constants qw{PI};
 use Geo::Functions qw{rad_deg};
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.10} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.11} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
