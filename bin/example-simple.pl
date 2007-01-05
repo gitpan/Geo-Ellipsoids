@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-example-simple - Geo::Ellipsoids simple example
+example-simple.pl - Geo::Ellipsoids simple example
 
 =cut
 

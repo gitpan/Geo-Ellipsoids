@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-example-list - Geo::Ellipsoids list method example
+example-list.pl - Geo::Ellipsoids list method example
 
 =cut
 
