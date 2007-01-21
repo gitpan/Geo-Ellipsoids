@@ -18,3 +18,18 @@ print "a=", $obj->a, "\n";
 print "b=", $obj->b, "\n";
 print "f=", $obj->f, "\n";
 print "i=", $obj->i, "\n";
+
+__END__
+
+=head1 SAMPLE OUTPUT
+
+  Short Name: WGS84
+  Long Name:  World Geodetic System of 1984
+  Ellipsoid:  {a=>6378137,i=>298.257223563}
+
+  a=6378137
+  b=6356752.31424518
+  f=0.00335281066474748
+  i=298.257223563
+
+=cut
