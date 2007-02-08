@@ -26,7 +26,7 @@ use constant DEFAULT_ELIPS => 'WGS84';
 use Geo::Constants qw{PI};
 use Geo::Functions qw{rad_deg};
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.13} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.14} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -118,7 +118,7 @@ sub a {
 
 Method returns the value of the semi-minor axis.
 
-  my $b=$obj->b;
+  my $b=$obj->b;  #b=a(1-f)
 
 =cut
 
@@ -127,7 +127,6 @@ sub b {
   if (defined $self->{'b'}) {
     return $self->{'b'};
   } elsif (defined $self->{'f'}) {
-    #f=(a-b)/a; b=a(1-f)
     return $self->{'a'}*(1-$self->{'f'});
   } elsif (defined $self->{'i'}) {
     return $self->{'a'}*(1-1/$self->{'i'});
@@ -140,7 +139,7 @@ sub b {
 
 Method returns the value of flatting
 
-  my $f=$obj->f;
+  my $f=$obj->f;  #f=(a-b)/a
 
 =cut
 
@@ -149,7 +148,6 @@ sub f {
   if (defined $self->{'f'}) {
     return $self->{'f'};
   } elsif (defined $self->{'b'}) {
-    #f=(a-b)/a;
     return ($self->{'a'}-$self->{'b'})/$self->{'a'};
   } elsif (defined $self->{'i'}) {
     return 1/$self->{'i'};
@@ -162,7 +160,7 @@ sub f {
 
 Method returns the value of the inverse flatting
 
-  my $i=$obj->i;
+  my $i=$obj->i; #i=1/f=a/(a-b)
 
 =cut
 
@@ -171,7 +169,6 @@ sub i {
   if (defined $self->{'i'}) {
     return $self->{'i'};
   } elsif (defined $self->{'b'}) {
-    #f=(a-b)/a;
     if ($self->{'a'} == $self->{'b'}) {
       return undef();
     } else {
@@ -188,7 +185,7 @@ sub i {
 
 Method synonym for the i method
 
-  my $i=$obj->infv;
+  my $i=$obj->invf; #i=1/f
 
 =cut
 
@@ -199,7 +196,7 @@ sub invf {
 
 =head2 e
 
-Method returns the value of eccentricity
+Method returns the value of the first eccentricity, e.  This is the eccentricity of the earth's elliptical cross-section.
 
   my $e=$obj->e;
 
@@ -212,9 +209,9 @@ sub e {
 
 =head2 e2
 
-Method returns the value of eccentricity squared (e.g. e^2)
+Method returns the value of eccentricity squared (e.g. e^2). This is not the second eccentricity, e' or e-prime see the "ep" method.
 
-  my $e=sqrt($obj->e2);
+  my $e=sqrt($obj->e2); #e^2 = f(2-f) = 2f-f^2 = 1-b^2/a^2
 
 =cut
 
@@ -224,11 +221,41 @@ sub e2 {
   return $f*(2 - $f);
 }
 
+=head2 ep
+
+Method returns the value of the second eccentricity, e' or e-prime.  The second eccentricity is related to the first eccentricity by the equation: 1=(1-e^2)(1+e'^2).
+
+  my $ep=$obj->ep;
+
+=cut
+
+sub ep {
+  my $self=shift();
+  return sqrt($self->ep2);
+}
+
+=head2 ep2
+
+Method returns the square of value of second eccentricity, e' (e-prime).  This is more useful in almost all equations.
+
+  my $ep=sqrt($obj->ep2);  #ep2=(ea/b)^2=e2/(1-e2)=a^2/b^2-1
+
+=cut
+
+sub ep2 {
+  my $self=shift();
+  my $a=$self->a();
+  my $b=$self->b();
+  return $a**2/$b**2 - 1;
+}
+
 =head2 n
 
-Method returns the value of n given latitude (degrees). #What is n called?
+Method returns the value of n given latitude (degrees).  Typically represented by the Greek letter nu, this is the radius of curvature of the ellipsoid perpendicular to the meridian plane.  It is also the distance from the point in question to the polar axis, measured perpendicular to the ellipsoid's surface.
 
   my $n=$obj->n($lat);
+
+Note: Some define a variable n as (a-b)/(a+b) this is not that variable.
 
 =cut
 
@@ -241,7 +268,7 @@ sub n {
 
 =head2 n_rad
 
-Method returns the value of n given latitude (radians). #What is n called?
+Method returns the value of n given latitude (radians).
 
   my $n=$obj->n_rad($lat);
 
@@ -251,7 +278,41 @@ sub n_rad {
   my $self=shift();
   my $lat=shift(); #radians
   die("Error: Latitude (radians) required.") unless defined $lat;
-  return $self->a / sqrt(1 - $self->e2 * sin($lat)**2);
+  my $a=$self->a;
+  my $e2=$self->e2;
+  return $a / sqrt(1 - $e2 * sin($lat)**2);
+}
+
+=head2 rho
+
+rho is the radius of curvature of the earth in the meridian plane.
+
+  my $rho=$obj->rho($lat);
+
+=cut
+
+sub rho {
+  my $self=shift();
+  my $lat=shift(); #degrees
+  die("Error: Latitude (degrees) required.") unless defined $lat;
+  return $self->rho_rad(rad_deg($lat));
+}
+
+=head2 rho_rad
+
+rho is the radius of curvature of the earth in the meridian plane.
+
+  my $rho=$obj->rho_rad($lat);
+
+=cut
+
+sub rho_rad {
+  my $self=shift();
+  my $lat=shift(); #radians
+  die("Error: Latitude (radians) required.") unless defined $lat;
+  my $a=$self->a;
+  my $e2=$self->e2;
+  return $a * (1-$e2) / sqrt(1 - $e2 * sin($lat)**(3/2));
 }
 
 =head2 polar_circumference
@@ -392,14 +453,21 @@ sub data {
     'Airy Modified'=>{name=>'Modified Airy Spheroid',
                       data=>{a=>6377340.189,b=>6356034.448}},
 
-    'Australian National'=>{name=>'Australian National Spheroid',
-                            data=>{a=>6378160,i=>298.25}},
+    'Australian National'=>{name=>'Australian National Spheroid of 1965',
+                            data=>{a=>6378160,i=>298.25},
+                            alias=>["Australian 1965"]},
 
     'Bessel 1841'=>{name=>'Bessel 1841 Ellipsoid',
                     data=>{a=>6377397.155,i=>299.1528128}},
 
     'Clarke 1880'=>{name=>'Clarke Ellipsoid of 1880',
                     data=>{a=>6378249.145,b=>6356514.966}},
+
+    'Clarke 1866'=>{name=>'Clarke Ellipsoid of 1866',
+                    data=>{a=>6378206.4,b=>6356583.8}},
+
+    'Danish 1876'=>{name=>'Danish Spheroid of 1876',
+                     data=>{a=>3271883.25*1.94903631,i=>300.00}},
 
     'Everest 1830'=>{name=>'Everest Spheroid of 1830',
                      data=>{a=>6377276.345,i=>300.8017}},
@@ -416,11 +484,12 @@ sub data {
     'Hough 1956'=>{name=>'Hough 1956',
                    data=>{a=>6378270,i=>297}},
 
-    'International (Hayford)'=>{name=>'International (Hayford)',
+    'International (Hayford)'=>{name=>'International - 1924 (Hayford - 1909)',
                                 data=>{a=>6378388,i=>297}},
 
     'Krassovsky 1938'=>{name=>'Krassovsky 1938',
-                        data=>{a=>6378245,i=>298.3}},
+                        data=>{a=>6378245,i=>298.3},
+                        alias=>["Krasovsky 1940"]},
 
     'NWL-9D'=>{name=>'NWL-9D Ellipsoid',
                data=>{a=>6378145,i=>298.25},
