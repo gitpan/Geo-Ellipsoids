@@ -26,7 +26,7 @@ use constant DEFAULT_ELIPS => 'WGS84';
 use Geo::Constants qw{PI};
 use Geo::Functions qw{rad_deg};
 
-$VERSION = sprintf("%d.%02d", q{Revision: 0.14} =~ /(\d+)\.(\d+)/);
+$VERSION = sprintf("%d.%02d", q{Revision: 0.16} =~ /(\d+)\.(\d+)/);
 
 =head1 CONSTRUCTOR
 
@@ -257,6 +257,10 @@ Method returns the value of n given latitude (degrees).  Typically represented b
 
 Note: Some define a variable n as (a-b)/(a+b) this is not that variable.
 
+Note: It appears that n can also be calculated as 
+
+  n=a^2/sqrt(a^2 * cos($lat)^2 + $b^2 * sin($lat)^2);
+
 =cut
 
 sub n {
@@ -271,6 +275,8 @@ sub n {
 Method returns the value of n given latitude (radians).
 
   my $n=$obj->n_rad($lat);
+
+Reference: John P. Snyder, "Map Projections: A Working Manual", USGS, page 25, equation (4-20) http://pubs.er.usgs.gov/usgspubs/pp/pp1395
 
 =cut
 
@@ -300,9 +306,11 @@ sub rho {
 
 =head2 rho_rad
 
-rho is the radius of curvature of the earth in the meridian plane.
+rho is the radius of curvature of the earth in the meridian plane. Sometimes denoted as R'.
 
   my $rho=$obj->rho_rad($lat);
+
+Reference: John P. Snyder, "Map Projections: A Working Manual", USGS, page 24, equation (4-18) http://pubs.er.usgs.gov/usgspubs/pp/pp1395
 
 =cut
 
@@ -312,7 +320,8 @@ sub rho_rad {
   die("Error: Latitude (radians) required.") unless defined $lat;
   my $a=$self->a;
   my $e2=$self->e2;
-  return $a * (1-$e2) / sqrt(1 - $e2 * sin($lat)**(3/2));
+  return $a * (1-$e2) / ( 1 - $e2 * sin($lat)**2 )**(3/2)
+  #return $a * (1-$e2) / sqrt(1 - $e2 * sin($lat)**(3/2)); #Bad formula from somewhere
 }
 
 =head2 polar_circumference

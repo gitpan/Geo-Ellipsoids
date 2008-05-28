@@ -38,7 +38,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 48 }
+BEGIN { plan tests => 49 }
 
 # just check that all modules can be compiled
 ok(eval {require Geo::Ellipsoids; 1}, 1, $@);
@@ -125,3 +125,4 @@ ok(near $e2, 1-$b**2/$a**2, 13);
 ok(near $ep2, ($e*$a/$b)**2, 13);
 ok(near $ep2, $e2/(1-$e2), 13);
 ok(near $ep2, $a**2/$b**2-1, 13);
+ok(near $ep2, ($a**2-$b**2)/$b**2, 13);
